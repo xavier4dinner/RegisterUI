@@ -16,9 +16,9 @@ const dbUrl = "https://ai-powered-digital-marke-fc7af-default-rtdb.asia-southeas
 
 
 //Register
-export function writeRegisterData(email, firstName, lastName, password, role) {
+export function OTPData(email, firstName, lastName, password, role) {
   const db = getDatabase(app, dbUrl);
-  const newUserRef = push(ref(db, 'Approval of Accounts'));
+  const newUserRef = push(ref(db, 'OTP Verification'));
   return set(newUserRef, {
     Email: email,
     FirstName: firstName,
