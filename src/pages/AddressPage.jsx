@@ -53,7 +53,7 @@ export default function AddressPage() {
     setLoading(true);
     setSubmitError("");
     try {
-      const response = await fetch("/Additional-Information", {
+      const response = await fetch("http://localhost:3000/Additional-Information", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),

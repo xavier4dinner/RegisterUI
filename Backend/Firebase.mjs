@@ -29,14 +29,14 @@ export function OTPData(email, firstName, lastName, password, role) {
 }
 
 
-export function fullUserInformation(contactNumber, City,State, Country, zipCode) {
+export function fullUserInformation(contactNumber, city,state, country, zipCode) {
   const db = getDatabase(app,dbUrl);
   const addInfoRef = push(ref(db, 'Approval of Accounts'))
   return set(addInfoRef, {
     ContactNumber : contactNumber,
-    City: City,
-    State: State,
-    Country: Country,
+    City: city,
+    State: state,
+    Country: country,
     ZipCode: zipCode
   })
 }

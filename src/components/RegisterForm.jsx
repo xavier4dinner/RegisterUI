@@ -64,7 +64,6 @@ export default function RegisterForm() {
 
   // Address fields and state
   const [addressFields, setAddressFields] = useState({
-    address: "",
     contactNumber: "",
     city: "",
     state: "",
@@ -140,45 +139,21 @@ export default function RegisterForm() {
       newErrors.retypePassword = "Passwords do not match";
     }
 
+
     setErrors(newErrors);
 
-    // Validate address fields
-    const addressValidation = {
-      address: { required: true, minLength: 5 },
-      contactNumber: { required: true, pattern: /^[0-9]{7,15}$/ }, // Only digits allowed
-      city: { required: true },
-      state: { required: true },
-      country: { required: true },
-      zipCode: { required: true, pattern: /^[0-9a-zA-Z\- ]{3,10}$/ },
-    };
-    const newAddressErrors = {};
-    Object.keys(addressFields).forEach((field) => {
-      const rules = addressValidation[field];
-      let error = "";
-      const value = addressFields[field];
-      if (rules.required && !value) error = "This field is required";
-      else if (rules.minLength && value.length < rules.minLength)
-        error = `Minimum ${rules.minLength} characters`;
-      else if (rules.pattern && !rules.pattern.test(value))
-        error = "Invalid format";
-      newAddressErrors[field] = error;
-    });
-    setAddressErrors(newAddressErrors);
-
-    if (
-      Object.values(newAddressErrors).some((err) => err) ||
-      Object.values(errors).some((err) => err)
-    ) {
+    if (Object.values(newErrors).some((err) => err)) {
       return;
     }
+
+  
 
     setLoading(true);
 
     try {
       // Prepare form data
       const formData = {
-        ...fields,
-        ...addressFields,
+        ...fields
       };
 
       // Send to backend
@@ -216,8 +191,9 @@ export default function RegisterForm() {
       if (!response.ok) throw new Error("OTP verification failed");
       setOtpVerified(true); // Show address page
       setShowOtpModal(false);
+      setSuccess(true);
     } catch (error) {
-      setOtpError("Invalid OTP. Please try again.");
+      setOtpError("Invalid OTP or failed to save address. Please try again.");
     } finally {
       setOtpLoading(false);
     }
@@ -225,6 +201,7 @@ export default function RegisterForm() {
 
   // Show address page after OTP is verified
   if (otpVerified) {
+    // Show the address form after OTP is verified
     return <AddressPage />;
   }
 
