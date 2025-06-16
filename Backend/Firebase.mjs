@@ -28,3 +28,15 @@ export function OTPData(email, firstName, lastName, password, role) {
   })
 }
 
+export function fullUserInformation(contactNumber, City,State, Country, zipCode) {
+  const db = getDatabase(app,dbUrl);
+  const addInfoRef = push(ref(db, 'Approval of Accounts'))
+  return set(addInfoRef, {
+    ContactNumber : contactNumber,
+    City: City,
+    State: State,
+    Country: Country,
+    ZipCode: zipCode
+  })
+}
+
