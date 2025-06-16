@@ -92,17 +92,17 @@ export default function RegisterForm() {
       [name]: validateField(name, value),
       ...(name === "retypePassword"
         ? {
-            retypePassword:
-              value !== fields.password ? "Passwords do not match" : "",
-          }
+          retypePassword:
+            value !== fields.password ? "Passwords do not match" : "",
+        }
         : {}),
       ...(name === "password"
         ? {
-            retypePassword:
-              fields.retypePassword && value !== fields.retypePassword
-                ? "Passwords do not match"
-                : "",
-          }
+          retypePassword:
+            fields.retypePassword && value !== fields.retypePassword
+              ? "Passwords do not match"
+              : "",
+        }
         : {}),
     }));
   };
@@ -161,7 +161,7 @@ export default function RegisterForm() {
   };
 
   // OTP submit
-  const handleOtpSubmit = async (otp) => {
+  const handleOtpSubmit = async (email, otp) => {
     setOtpLoading(true);
     setOtpError("");
     try {
@@ -169,7 +169,7 @@ export default function RegisterForm() {
       const response = await fetch("http://localhost:3000/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...pendingUser, otp }),
+        body: JSON.stringify({ email, otp }),
       });
       if (!response.ok) throw new Error("OTP verification failed");
       setShowOtpModal(false);
@@ -274,30 +274,26 @@ export default function RegisterForm() {
             />
             <div className="password-requirements">
               <div
-                className={`requirement ${
-                  passwordStrength.hasLength ? "valid" : "invalid"
-                }`}
+                className={`requirement ${passwordStrength.hasLength ? "valid" : "invalid"
+                  }`}
               >
                 <span>•</span> At least 8 characters
               </div>
               <div
-                className={`requirement ${
-                  passwordStrength.hasUppercase ? "valid" : "invalid"
-                }`}
+                className={`requirement ${passwordStrength.hasUppercase ? "valid" : "invalid"
+                  }`}
               >
                 <span>•</span> One uppercase letter
               </div>
               <div
-                className={`requirement ${
-                  passwordStrength.hasLowercase ? "valid" : "invalid"
-                }`}
+                className={`requirement ${passwordStrength.hasLowercase ? "valid" : "invalid"
+                  }`}
               >
                 <span>•</span> One lowercase letter
               </div>
               <div
-                className={`requirement ${
-                  passwordStrength.hasNumber ? "valid" : "invalid"
-                }`}
+                className={`requirement ${passwordStrength.hasNumber ? "valid" : "invalid"
+                  }`}
               >
                 <span>•</span> One number
               </div>
@@ -334,7 +330,7 @@ export default function RegisterForm() {
       )}
       <OTPModal
         show={showOtpModal}
-        onSubmit={handleOtpSubmit}
+        onSubmit={(otp) => handleOtpSubmit(pendingUser.email, otp)}
         onClose={() => setShowOtpModal(false)}
         loading={otpLoading}
         error={otpError}
