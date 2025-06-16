@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import express from 'express';
 import cors from 'cors';
 import { OTPData } from './Firebase.mjs';
+import { fullUserInformation} from'./Firebase.mjs'
 
 const app = express();
 const PORT = 3000;
@@ -73,12 +74,12 @@ app.post('/verify-otp', (req, res) => {
 })
 
 app.post('/Additional-Information', async (req, res) => {
-    const { contactNumber, City, State, Country, zipCode } = req.body;
-    if (!contactNumber || !City || !State || !Country || !zipCode) {
+    const { contactNumber, city, state, country, zipCode } = req.body;
+    if (!contactNumber || !city || !state || !country || !zipCode) {
         return res.status(400).json({ success: false, error: 'All fields are required' })
     }
     try{
-    await fullUserInformation (contactNumber, City, State, Country, zipCode)
+    await fullUserInformation(contactNumber, city, state, country, zipCode)
     return res.json({success: true,})
     } catch (error) {
         return res.status(500).json({success: false, error: 'Failed to Save additional data'})
