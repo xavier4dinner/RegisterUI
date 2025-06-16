@@ -39,12 +39,3 @@ export default function OTPModal({ show, onSubmit, onClose, loading, error }) {
     </div>
   );
 }
-
-// Usage example (this part is not in the original file, just showing how the component is used)
-<OTPModal
-  show={showOtpModal}
-  onSubmit={handleOtpSubmit}
-  onClose={() => setShowOtpModal(false)}
-  loading={otpLoading}
-  error={otpError}
-/>

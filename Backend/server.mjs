@@ -55,6 +55,38 @@ app.post('/register', async (req, res) => {
     }
 });
 
+//OTP verification
+app.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    const record = otpStore[email];
+    if (!record) {
+        return res.status(400).json({ success: false, error: 'No OTP Found' })
+    }
+    if (Date.now() > record.expires) {
+        return res.status(400).json({ success: false, error: 'OTP Expired' })
+    }
+    if (String(record.otp) !== String(otp).trim()) {
+        return res.status(400).json({ success: false, error: 'Invalid OTP' })
+    }
+    delete otpStore[email];
+    return res.json({success: true, message: 'OTP Verified.'})
+})
+
+app.post('/Additional-Information', async (req, res) => {
+    const { contactNumber, City, State, Country, zipCode } = req.body;
+    if (!contactNumber || !City || !State || !Country || !zipCode) {
+        return res.status(400).json({ success: false, error: 'All fields are required' })
+    }
+    try{
+    await fullUserInformation (contactNumber, City, State, Country, zipCode)
+    return res.json({success: true,})
+    } catch (error) {
+        return res.status(500).json({success: false, error: 'Failed to Save additional data'})
+    }
+})
+
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
