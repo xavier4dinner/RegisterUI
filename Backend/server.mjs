@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import express from 'express';
 import cors from 'cors';
-import { writeRegisterData } from './Firebase.mjs';
+import { OTPData } from './Firebase.mjs';
 
 const app = express();
 const PORT = 3000;
@@ -30,7 +30,7 @@ app.post('/register', async (req, res) => {
         if (!email || !firstName || !lastName || !password) {
             return res.status(400).json({ success: false, error: 'All fields are required' });
         }
-        const user = await writeRegisterData(email, firstName, lastName, password, role);
+        const user = await OTPData(email, firstName, lastName, password, role);
         console.log('User Registered:', user);
 
         const otp = generateOTP();
