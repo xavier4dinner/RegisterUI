@@ -39,3 +39,4 @@ export default function OTPModal({ show, onSubmit, onClose, loading, error }) {
     </div>
   );
 }
+
