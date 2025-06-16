@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import OTPModal from "./OTPModal";
+import AddressPage from "../pages/AddressPage"; // Adjust path if needed
 import "./../Register.css";
 
 const validation = {
@@ -55,10 +56,22 @@ export default function RegisterForm() {
 
   // OTP modal state
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  // Address fields and state
+  const [addressFields, setAddressFields] = useState({
+    address: "",
+    contactNumber: "",
+    city: "",
+    state: "",
+    country: "",
+    zipCode: "",
+  });
+  const [addressErrors, setAddressErrors] = useState({});
 
   const validateField = (field, value) => {
     const rules = validation[field];
@@ -107,6 +120,12 @@ export default function RegisterForm() {
     }));
   };
 
+  // Address change handler
+  const handleAddressChange = (name, value) => {
+    setAddressFields((prev) => ({ ...prev, [name]: value }));
+    // Optionally validate here and set errors
+  };
+
   // Registration submit
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -123,7 +142,33 @@ export default function RegisterForm() {
 
     setErrors(newErrors);
 
-    if (Object.values(newErrors).some((err) => err)) {
+    // Validate address fields
+    const addressValidation = {
+      address: { required: true, minLength: 5 },
+      contactNumber: { required: true, pattern: /^[0-9]{7,15}$/ }, // Only digits allowed
+      city: { required: true },
+      state: { required: true },
+      country: { required: true },
+      zipCode: { required: true, pattern: /^[0-9a-zA-Z\- ]{3,10}$/ },
+    };
+    const newAddressErrors = {};
+    Object.keys(addressFields).forEach((field) => {
+      const rules = addressValidation[field];
+      let error = "";
+      const value = addressFields[field];
+      if (rules.required && !value) error = "This field is required";
+      else if (rules.minLength && value.length < rules.minLength)
+        error = `Minimum ${rules.minLength} characters`;
+      else if (rules.pattern && !rules.pattern.test(value))
+        error = "Invalid format";
+      newAddressErrors[field] = error;
+    });
+    setAddressErrors(newAddressErrors);
+
+    if (
+      Object.values(newAddressErrors).some((err) => err) ||
+      Object.values(errors).some((err) => err)
+    ) {
       return;
     }
 
@@ -132,11 +177,8 @@ export default function RegisterForm() {
     try {
       // Prepare form data
       const formData = {
-        email: fields.email,
-        firstName: fields.firstName,
-        lastName: fields.lastName,
-        role: fields.role,
-        password: fields.password,
+        ...fields,
+        ...addressFields,
       };
 
       // Send to backend
@@ -160,7 +202,7 @@ export default function RegisterForm() {
     }
   };
 
-  // OTP submit
+  // OTP submit handler
   const handleOtpSubmit = async (otp) => {
     setOtpLoading(true);
     setOtpError("");
@@ -172,14 +214,19 @@ export default function RegisterForm() {
         body: JSON.stringify({ ...pendingUser, otp }),
       });
       if (!response.ok) throw new Error("OTP verification failed");
+      setOtpVerified(true); // Show address page
       setShowOtpModal(false);
-      setSuccess(true); // Show success message or next step
     } catch (error) {
       setOtpError("Invalid OTP. Please try again.");
     } finally {
       setOtpLoading(false);
     }
   };
+
+  // Show address page after OTP is verified
+  if (otpVerified) {
+    return <AddressPage />;
+  }
 
   return (
     <div className="form-container">
