@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import OTPModal from "./OTPModal";
 import "./../Register.css";
 
 const validation = {
@@ -39,6 +40,7 @@ function checkPasswordStrength(password) {
 }
 
 export default function RegisterForm() {
+  // Registration fields and state
   const [fields, setFields] = useState({
     firstName: "",
     lastName: "",
@@ -49,8 +51,14 @@ export default function RegisterForm() {
   });
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState({});
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // OTP modal state
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const validateField = (field, value) => {
     const rules = validation[field];
@@ -99,7 +107,8 @@ export default function RegisterForm() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  // Registration submit
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
     // Validate all fields
@@ -142,11 +151,33 @@ export default function RegisterForm() {
         throw new Error(error.message || "Registration failed");
       }
 
-      setSuccess(true);
+      setPendingUser(formData);
+      setShowOtpModal(true);
     } catch (error) {
       alert("Registration failed: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // OTP submit
+  const handleOtpSubmit = async (otp) => {
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      // Send OTP and user info to backend
+      const response = await fetch("http://localhost:3000/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...pendingUser, otp }),
+      });
+      if (!response.ok) throw new Error("OTP verification failed");
+      setShowOtpModal(false);
+      setSuccess(true); // Show success message or next step
+    } catch (error) {
+      setOtpError("Invalid OTP. Please try again.");
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -155,11 +186,11 @@ export default function RegisterForm() {
       <h1 className="title">Create your account</h1>
       {success && (
         <div className="success-message">
-          Account created successfully! Please check your email for verification.
+          Account created and verified successfully!
         </div>
       )}
       {!success && (
-        <form className="form" onSubmit={handleSubmit} noValidate>
+        <form className="form" onSubmit={handleRegisterSubmit} noValidate>
           <div className="form-group">
             <label htmlFor="firstName" className="label">
               First Name
@@ -301,6 +332,13 @@ export default function RegisterForm() {
           </button>
         </form>
       )}
+      <OTPModal
+        show={showOtpModal}
+        onSubmit={handleOtpSubmit}
+        onClose={() => setShowOtpModal(false)}
+        loading={otpLoading}
+        error={otpError}
+      />
     </div>
   );
 }
