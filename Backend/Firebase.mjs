@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, push, get, remove} from "firebase/database";
+import { getDatabase, ref, set, push, get, remove } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAdCkNDNjnrusXg6blO7z02EkhCiezpvdY",
@@ -14,15 +14,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const dbUrl = "https://ai-powered-digital-marke-fc7af-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-
+//Register Start
 //OTP Save
-export function OTPsave(email, firstName, lastName, password, role, otp, expire) {
+export function OTPsave(email, firstName, lastName, username, password, role, otp, expire) {
   const db = getDatabase(app, dbUrl);
   const newUserOTPRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
   return set(newUserOTPRef, {
     Email: email,
     FirstName: firstName,
     LastName: lastName,
+    Username: username,
     Password: password,
     Role: role,
     OTP: otp,
@@ -32,21 +33,39 @@ export function OTPsave(email, firstName, lastName, password, role, otp, expire)
 
 export async function getOTP(email) {
   const db = getDatabase(app, dbUrl);
-  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`); 
+  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
   const snapshot = await get(otpRef);
   return snapshot.exists() ? snapshot.val() : null;
 }
 
 export async function deleteOTP(email) {
   const db = getDatabase(app, dbUrl);
-  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`); 
+  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
   return remove(otpRef)
 }
 
 
 export function fullUserInformation(user) {
-  const db = getDatabase(app,dbUrl);
+  const db = getDatabase(app, dbUrl);
   const addInfoRef = push(ref(db, 'ApprovalofAccounts'))
   return set(addInfoRef, user);
 }
 
+export async function usernameChecker(username) {
+  const db = getDatabase(app, dbUrl);
+  const roles = ['ContentCreator', 'MarketingLead', 'GraphicDesigner'];
+  for (const role of roles) {
+    const nodeRef = ref(db, role);
+    const snapshot = await get(nodeRef);
+    if (snapshot.exists()){
+      const user = snapshot.val();
+      if(Object.values(user).some(user => user.Username && user.Username.toLowerCase() === username.toLowerCase())) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+//Register End
+
+//Login Start
