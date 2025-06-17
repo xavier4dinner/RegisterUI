@@ -19,7 +19,7 @@ function validateField(field, value) {
   return "";
 }
 
-export default function AddressPage() {
+export default function AddressPage({ email }) {
   const [fields, setFields] = useState({
     contactNumber: "",
     city: "",
@@ -56,7 +56,7 @@ export default function AddressPage() {
       const response = await fetch("http://localhost:3000/Additional-Information", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
+        body: JSON.stringify({ email, ...fields }), // <-- FIXED LINE
       });
       if (!response.ok) throw new Error("Failed to submit information");
       setSubmitted(true);

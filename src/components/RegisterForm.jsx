@@ -32,7 +32,7 @@ const validation = {
   },
   username: {
     required: true,
-    minLength: 8, 
+    minLength: 8,
     pattern: /^[a-zA-Z0-9_]+$/,
   },
 };
@@ -55,7 +55,7 @@ export default function RegisterForm() {
     username: "", // <-- add this
     role: "",
     password: "",
-    retypePassword: "",
+    retypePassword: ""
   });
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState({});
@@ -199,7 +199,7 @@ export default function RegisterForm() {
       };
 
       // Send to backend
-      const response = await fetch("http://localhost:3000/register", {
+      const response = await fetch("http://localhost:3000/OTP-save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -242,11 +242,9 @@ export default function RegisterForm() {
   };
 
   // Show address page after OTP is verified
-  if (otpVerified) {
-    // Show the address form after OTP is verified
-    return <AddressPage />;
+  if (otpVerified && pendingUser) {
+    return <AddressPage email={pendingUser.email} />;
   }
-
   const allPasswordRequirementsMet =
     passwordStrength.hasLength &&
     passwordStrength.hasUppercase &&
