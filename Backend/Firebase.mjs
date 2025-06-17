@@ -14,11 +14,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const dbUrl = "https://ai-powered-digital-marke-fc7af-default-rtdb.asia-southeast1.firebasedatabase.app";
 
+function safeKey(email) {
+  return email.replace(/[.#$\[\]]/g, '_');
+}
+
 //Register Start
 //OTP Save
 export function OTPsave(email, firstName, lastName, username, password, role, otp, expire) {
   const db = getDatabase(app, dbUrl);
-  const newUserOTPRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
+  const newUserOTPRef = ref(db, `OTPVerification/${safeKey(email)}`);
   return set(newUserOTPRef, {
     Email: email,
     FirstName: firstName,
@@ -33,14 +37,16 @@ export function OTPsave(email, firstName, lastName, username, password, role, ot
 
 export async function getOTP(email) {
   const db = getDatabase(app, dbUrl);
-  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
+  const key = safeKey(email);
+  console.log("Looking up OTP with key:", key);
+  const otpRef = ref(db, `OTPVerification/${safeKey(email)}`);
   const snapshot = await get(otpRef);
   return snapshot.exists() ? snapshot.val() : null;
 }
 
 export async function deleteOTP(email) {
   const db = getDatabase(app, dbUrl);
-  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
+  const otpRef = ref(db, `OTPVerification/${safeKey(email)}`);
   return remove(otpRef)
 }
 
