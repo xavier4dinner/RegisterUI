@@ -27,8 +27,8 @@ function generateOTP() {
 // OTP Save
 app.post('/OTP-save', async (req, res) => {
     try {
-        const { email, firstName, lastName, username, password, role } = req.body;
-        if (!email || !firstName || !lastName || !username ||  !password) {
+        const { email, firstName, lastName, username, password, role, retypePassword} = req.body;
+        if (!email || !firstName || !lastName || !username ||  !password || !retypePassword) {
             return res.status(400).json({ success: false, error: 'All fields are required' });
         }
 
@@ -76,12 +76,12 @@ app.post('/verify-otp', async (req, res) => {
     if (String(record.OTP) !== String(otp).trim()) {
         return res.status(400).json({ success: false, error: 'Invalid OTP' })
     }
-    await deleteOTP(email);
     return res.json({success: true, message: 'OTP Verified.'})
 })
 
 app.post('/Additional-Information', async (req, res) => {
     const { email, contactNumber, city, state, country, zipCode } = req.body;
+    console.log(req.body)
     if (!email || !contactNumber || !city || !state || !country || !zipCode) {
         return res.status(400).json({ success: false, error: 'All fields are required' })
     }
@@ -92,7 +92,7 @@ app.post('/Additional-Information', async (req, res) => {
     }
 
     const fullInformation = {
-        Email: email,
+        Email: pending.Email,
         FirstName: pending.FirstName,
         LastName: pending.LastName,
         Username: pending.Username,
