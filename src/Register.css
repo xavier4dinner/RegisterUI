@@ -4,12 +4,15 @@
     box-sizing: border-box;
 }
 
+body, #root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
 .header {
@@ -23,45 +26,69 @@ body {
 }
 
 .logo {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    border-radius: 50%;
+    width: 120px;
+    height: 80px;
+    border-radius: 40px;
     display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img {
+    width: 110px;
+    height: 70px;
+    border-radius: 35px;
+    object-fit: contain;
 }
 
 .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px); /* header + footer height */
 }
 
 .form-container {
-    width: 100%;
-    max-width: 28rem;
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  max-width: 420px;
+  width: 100%;
 }
 
 .title {
-    font-size: 1.5rem;
-    font-weight: 500;
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #000000;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.5rem; /* Try a smaller gap, or remove entirely */
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 12px; /* Reduce from 24px to 12px */
+}
+
+.form-group span[role="button"] {
+  position: absolute;
+  right: 12px;
+  top: 12px; /* fixed from the top, not 50% */
+  transform: none; /* remove translateY(-50%) */
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.2em;
+  line-height: 1;
+  z-index: 2;
 }
 
 .label {
@@ -70,44 +97,41 @@ body {
     color: #000000;
 }
 
-.input {
-    width: 100%;
-    height: 3rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #050505;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background-color: #ffffff;
-    transition: border-color 0.2s;
+.input, .select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  height: 44px;           /* Set a fixed height */
+  padding-right: 36px;    /* Make space for the eye icon */
+  box-sizing: border-box;
 }
 
-.input:focus {
-    outline: none;
-    border-color: #346adf;
-    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+.input:focus, .select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px #e3f0ff;
+  outline: none;
 }
 
 .input.error {
     border-color: #eb3131;
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+  /* Keep the same height and padding as .input */
+  height: 44px;
+  padding-right: 36px;
+  box-sizing: border-box;
 }
 
-.select {
-    width: 100%;
-    height: 3rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #000000;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: border-color 0.2s;
+.input.success {
+  border: 2px solid #2ecc40 !important;
 }
 
-.select:focus {
-    outline: none;
-    border-color: #346adf;
-    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+.input.password-input {
+  padding-right: 2.5rem;
+  box-sizing: border-box;
 }
 
 .upload-container {
@@ -196,41 +220,54 @@ body {
 }
 
 .footer {
-    background-color: #F82F2F;
-    padding: 0.1rem 1.5rem;
+  width: 100vw;
+  background: #e74c3c;
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .footer-container {
-    max-width: 10000px;
-    margin: 0 auto;
-    display: flex;
-    gap: 92rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 0 2rem;
+  box-sizing: border-box;
 }
 
-#nails {
-    width: 70px;
-    height: 50px;
+.nail img, #nails {
+  height: 48px;      /* Adjust as needed, try 48-56px for balance */
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin-left: 8px;  /* Add some space from the edge */
 }
 
 .footer-links {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.facebook-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  color: #000;
+  font-size: 1rem;
+  margin-right: 8px;
 }
 
 .footer-link {
-    font-size: 0.875rem;
-    color: #000000;
-    text-decoration: none;
+  color: #000;
+  text-decoration: none;
+  margin-bottom: 2px;
 }
 
 .footer-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .error-message {
@@ -250,23 +287,29 @@ body {
 }
 
 .password-requirements {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
+    margin: 0.5rem 0 0 0;
+    padding: 0 0 0 1.2rem;
+    list-style: disc;
 }
 
 .requirement {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
+  font-size: 1rem;
+  margin: 0.1rem 0;
+  list-style: disc inside;
 }
 
 .requirement.valid {
-    color: #16a34a;
+  color: #27ae60; /* green */
+  font-weight: 500;
+  background: none;
+  border: none;
 }
 
 .requirement.invalid {
-    color: #ef4444;
+  color: #e74c3c; /* red */
+  font-weight: 400;
+  background: none;
+  border: none;
 }
 
 .loading {
@@ -296,4 +339,54 @@ body {
   min-width: 300px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.2);
   text-align: center;
+}
+.eye-icon {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.3rem;
+  color: #888;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #888;
+  user-select: none;
+}
+
+.password-success-indicator {
+  color: #2ecc40;
+  font-weight: 500;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checking-message {
+  color: #007bff;
+  font-size: 0.95em;
+  margin-top: 4px;
 }

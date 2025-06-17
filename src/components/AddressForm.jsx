@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-export default function AddressForm({ onChange, values = {}, errors = {} }) {
+function AddressForm({ onChange, values = {}, errors = {} }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (onChange) onChange(name, value);
@@ -12,14 +12,14 @@ export default function AddressForm({ onChange, values = {}, errors = {} }) {
         <label htmlFor="contactNumber" className="label">Contact Number</label>
         <input
           type="tel"
-          inputMode="numeric"
-          pattern="[0-9]*"
           id="contactNumber"
           name="contactNumber"
           className={`input${errors.contactNumber ? " error" : ""}`}
           value={values.contactNumber || ""}
           onChange={handleChange}
           required
+          inputMode="numeric"
+          pattern="[0-9]*"
         />
         <div className="error-message">{errors.contactNumber}</div>
       </div>
@@ -78,3 +78,5 @@ export default function AddressForm({ onChange, values = {}, errors = {} }) {
     </>
   );
 }
+
+export default AddressForm;

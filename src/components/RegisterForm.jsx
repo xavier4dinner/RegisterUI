@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import OTPModal from "./OTPModal";
 import AddressPage from "../pages/AddressPage"; // Adjust path if needed
 import "./../Register.css";
+import PasswordInput from "./PasswordInput";
 
 const validation = {
   firstName: {
@@ -16,7 +17,7 @@ const validation = {
   },
   email: {
     required: true,
-    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
   },
   role: {
     required: true,
@@ -28,6 +29,11 @@ const validation = {
   },
   retypePassword: {
     required: true,
+  },
+  username: {
+    required: true,
+    minLength: 8, 
+    pattern: /^[a-zA-Z0-9_]+$/,
   },
 };
 
@@ -46,6 +52,7 @@ export default function RegisterForm() {
     firstName: "",
     lastName: "",
     email: "",
+    username: "", // <-- add this
     role: "",
     password: "",
     retypePassword: "",
@@ -71,6 +78,10 @@ export default function RegisterForm() {
     zipCode: "",
   });
   const [addressErrors, setAddressErrors] = useState({});
+
+  // Username availability state
+  const [usernameUsed, setUsernameUsed] = useState(false);
+  const [usernameChecking, setUsernameChecking] = useState(false);
 
   const validateField = (field, value) => {
     const rules = validation[field];
@@ -125,6 +136,39 @@ export default function RegisterForm() {
     // Optionally validate here and set errors
   };
 
+  // Username change handler
+  const handleUsernameChange = async (e) => {
+    const value = e.target.value;
+    setFields((prev) => ({ ...prev, username: value }));
+    setUsernameUsed(false);
+    setErrors((prev) => ({ ...prev, username: undefined }));
+
+    if (value.length < 8) {
+      setErrors((prev) => ({ ...prev, username: "Username must be at least 8 characters." }));
+      return;
+    }
+
+    setUsernameChecking(true);
+    // Simulate API/database check (replace with your real API call) 
+    //Example to for our database
+    const isUsed = await fakeCheckUsername(value);
+    setUsernameChecking(false);
+    setUsernameUsed(isUsed);
+    if (isUsed) {
+      setErrors((prev) => ({ ...prev, username: "Username is already used." }));
+    }
+  };
+
+  // Simulated API call (replace with your real API call)
+  //Example to for our database
+  const fakeCheckUsername = async (username) => {
+    // Simulate a delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Example: these usernames are taken
+    const taken = ["admin", "user", "test"];
+    return taken.includes(username.toLowerCase());
+  };
+
   // Registration submit
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -138,15 +182,13 @@ export default function RegisterForm() {
     if (fields.password !== fields.retypePassword) {
       newErrors.retypePassword = "Passwords do not match";
     }
-
+    if (!fields.role) newErrors.role = "Choose a role";
 
     setErrors(newErrors);
 
     if (Object.values(newErrors).some((err) => err)) {
       return;
     }
-
-  
 
     setLoading(true);
 
@@ -205,6 +247,29 @@ export default function RegisterForm() {
     return <AddressPage />;
   }
 
+  const allPasswordRequirementsMet =
+    passwordStrength.hasLength &&
+    passwordStrength.hasUppercase &&
+    passwordStrength.hasLowercase &&
+    passwordStrength.hasNumber;
+
+  const passwordsMatch =
+    fields.password &&
+    fields.retypePassword &&
+    fields.password === fields.retypePassword;
+
+  // Only show when both are true
+  const showPasswordSuccess = allPasswordRequirementsMet && passwordsMatch;
+
+  const firstNameValid =
+    fields.firstName.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.firstName);
+
+  const lastNameValid =
+    fields.lastName.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.lastName);
+
+  const emailValid =
+    /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(fields.email);
+
   return (
     <div className="form-container">
       <h1 className="title">Create your account</h1>
@@ -223,7 +288,7 @@ export default function RegisterForm() {
               type="text"
               id="firstName"
               name="firstName"
-              className={`input${errors.firstName ? " error" : ""}`}
+              className={`input${errors.firstName ? " error" : ""}${firstNameValid ? " success" : ""}`}
               value={fields.firstName}
               onChange={handleInputChange}
               required
@@ -239,7 +304,7 @@ export default function RegisterForm() {
               type="text"
               id="lastName"
               name="lastName"
-              className={`input${errors.lastName ? " error" : ""}`}
+              className={`input${errors.lastName ? " error" : ""}${lastNameValid ? " success" : ""}`}
               value={fields.lastName}
               onChange={handleInputChange}
               required
@@ -248,19 +313,41 @@ export default function RegisterForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email" className="label">
-              Email
-            </label>
+            <label htmlFor="username" className="label">Username</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              className={`input${errors.email ? " error" : ""}`}
-              value={fields.email}
-              onChange={handleInputChange}
+              type="text"
+              name="username"
+              value={fields.username}
+              onChange={handleUsernameChange}
+              className={`input${errors.username ? " error" : ""}${fields.username && !usernameUsed && !errors.username ? " success" : ""}`}
+              placeholder="Username"
+              autoComplete="username"
               required
             />
-            <div className="error-message">{errors.email}</div>
+            {usernameChecking ? (
+              <div className="checking-message">Checking username availability...</div>
+            ) : usernameUsed ? (
+              <div className="error-message">Username is already used.</div>
+            ) : errors.username ? (
+              <div className="error-message">{errors.username}</div>
+            ) : null}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email" className="label">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={fields.email}
+              onChange={handleInputChange}
+              className={`input${errors.email ? " error" : ""}${emailValid ? " success" : ""}`}
+              placeholder="Email"
+              autoComplete="email"
+              required
+            />
+            {errors.email && (
+              <div className="error-message">{errors.email}</div>
+            )}
           </div>
 
           <div className="form-group">
@@ -287,59 +374,34 @@ export default function RegisterForm() {
             <label htmlFor="password" className="label">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className={`input${errors.password ? " error" : ""}`}
+            <PasswordInput
               value={fields.password}
               onChange={handleInputChange}
-              required
+              error={errors.password}
+              name="password"
+              placeholder="Password"
+              success={allPasswordRequirementsMet}
             />
-            <div className="password-requirements">
-              <div
-                className={`requirement ${passwordStrength.hasLength ? "valid" : "invalid"
-                  }`}
-              >
-                <span>•</span> At least 8 characters
-              </div>
-              <div
-                className={`requirement ${passwordStrength.hasUppercase ? "valid" : "invalid"
-                  }`}
-              >
-                <span>•</span> One uppercase letter
-              </div>
-              <div
-                className={`requirement ${passwordStrength.hasLowercase ? "valid" : "invalid"
-                  }`}
-              >
-                <span>•</span> One lowercase letter
-              </div>
-              <div
-                className={`requirement ${passwordStrength.hasNumber ? "valid" : "invalid"
-                  }`}
-              >
-                <span>•</span> One number
-              </div>
-            </div>
-            <div className="error-message">{errors.password}</div>
           </div>
 
           <div className="form-group">
             <label htmlFor="retypePassword" className="label">
               Retype Password
             </label>
-            <input
-              type="password"
-              id="retypePassword"
-              name="retypePassword"
-              className={`input${errors.retypePassword ? " error" : ""}`}
+            <PasswordInput
               value={fields.retypePassword}
               onChange={handleInputChange}
-              required
+              error={errors.retypePassword}
+              name="retypePassword"
+              placeholder="Retype Password"
             />
-            <div className="error-message">{errors.retypePassword}</div>
           </div>
+
+          {passwordsMatch && (
+            <div className="password-success-indicator">
+              <span role="img" aria-label="success">✅</span> Passwords matched!
+            </div>
+          )}
 
           <button
             type="submit"
