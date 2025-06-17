@@ -116,7 +116,27 @@ app.post('/Additional-Information', async (req, res) => {
 //Register End
 
 //Login Start
-
+/*
+app.post('/login', async (req, res) => {
+    const {username, password} = req.body;
+    if (!username || ! password) {
+        return res.status(400),json({success: false, error: 'All fields are required'})
+    }
+    const user = await LoginAccount(username);
+    if(!user) {
+        return res.status(400).json({success: false, error: 'Invalid Username and Password'})
+    }
+    const match = bcrypt.compare(password, user.Password)
+    if(!match) {
+        return res.status(400).json({success: false, error: 'Invalid Username and Password'})
+    }
+    return res.json({
+        success: true,
+        user: {
+            Role: user.Role
+        }
+    })
+})*/
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

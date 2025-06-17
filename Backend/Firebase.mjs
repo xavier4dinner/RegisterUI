@@ -58,8 +58,8 @@ export async function usernameChecker(username) {
     const nodeRef = ref(db, role);
     const snapshot = await get(nodeRef);
     if (snapshot.exists()){
-      const user = snapshot.val();
-      if(Object.values(user).some(user => user.Username && user.Username.toLowerCase() === username.toLowerCase())) {
+      const users = snapshot.val();
+      if(Object.values(users).some(user => user.Username && user.Username.toLowerCase() === username.toLowerCase())) {
         return true;
       }
     }
@@ -69,3 +69,22 @@ export async function usernameChecker(username) {
 //Register End
 
 //Login Start
+/*
+export async function LoginAccount(username) {
+  const db = getDatabase(app, dbUrl);
+  const roles = ['ContentCreator', 'MarketingLead', 'GraphicDesigner'];
+  for (const role of roles) {
+    const nodeRef = ref(db, role);
+    const snapshot = await get(nodeRef);
+    if (snapshot.exists()){
+      const users = snapshot.val();
+      for (const user of Object.values(users)) {
+        if(user.Username && user.Username.toLowerCase() === username.toLowerCase()) {
+          return user;
+        }
+        
+      }
+    }
+  }
+  return null;
+}*/
