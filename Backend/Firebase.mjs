@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, push} from "firebase/database";
+import { getDatabase, ref, set, push, get, remove} from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAdCkNDNjnrusXg6blO7z02EkhCiezpvdY",
@@ -15,29 +15,38 @@ const app = initializeApp(firebaseConfig);
 const dbUrl = "https://ai-powered-digital-marke-fc7af-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 
-//Register
-export function OTPData(email, firstName, lastName, password, role) {
+//OTP Save
+export function OTPsave(email, firstName, lastName, password, role, otp, expire) {
   const db = getDatabase(app, dbUrl);
-  const newUserRef = push(ref(db, 'OTP Verification'));
-  return set(newUserRef, {
+  const newUserOTPRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`);
+  return set(newUserOTPRef, {
     Email: email,
     FirstName: firstName,
     LastName: lastName,
     Password: password,
-    Role: role
+    Role: role,
+    OTP: otp,
+    Expire: expire
   })
 }
 
+export async function getOTP(email) {
+  const db = getDatabase(app, dbUrl);
+  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`); 
+  const snapshot = await get(otpRef);
+  return snapshot.exists() ? snapshot.val() : null;
+}
 
-export function fullUserInformation(contactNumber, city,state, country, zipCode) {
+export async function deleteOTP(email) {
+  const db = getDatabase(app, dbUrl);
+  const otpRef = ref(db, `OTPVerification/${encodeURIComponent(email)}`); 
+  return remove(otpRef)
+}
+
+
+export function fullUserInformation(user) {
   const db = getDatabase(app,dbUrl);
-  const addInfoRef = push(ref(db, 'Approval of Accounts'))
-  return set(addInfoRef, {
-    ContactNumber : contactNumber,
-    City: city,
-    State: state,
-    Country: country,
-    ZipCode: zipCode
-  })
+  const addInfoRef = push(ref(db, 'ApprovalofAccounts'))
+  return set(addInfoRef, user);
 }
 

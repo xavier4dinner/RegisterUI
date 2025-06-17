@@ -1,16 +1,14 @@
 import nodemailer from 'nodemailer';
 import express from 'express';
 import cors from 'cors';
-import { OTPData } from './Firebase.mjs';
-import { fullUserInformation} from'./Firebase.mjs'
+import bcrypt from 'bcrypt';
+import { OTPsave, getOTP, deleteOTP, fullUserInformation } from './Firebase.mjs';
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-
-const otpStore = {};
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -24,18 +22,19 @@ function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Register
-app.post('/register', async (req, res) => {
+// OTP Save
+app.post('/OTP-save', async (req, res) => {
     try {
         const { email, firstName, lastName, password, role } = req.body;
         if (!email || !firstName || !lastName || !password) {
             return res.status(400).json({ success: false, error: 'All fields are required' });
         }
-        const user = await OTPData(email, firstName, lastName, password, role);
-        console.log('User Registered:', user);
-
         const otp = generateOTP();
-        otpStore[email] = { otp, expires: Date.now() + 3 * 60 * 1000 };
+        const expire =  Date.now() + 3 * 60 * 1000;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await OTPsave(email, firstName, lastName, hashedPassword, role, otp, expire);
 
         try {
             await transporter.sendMail({
@@ -57,29 +56,49 @@ app.post('/register', async (req, res) => {
 });
 
 //OTP verification
-app.post('/verify-otp', (req, res) => {
+app.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
-    const record = otpStore[email];
+    const record = await getOTP(email);
     if (!record) {
         return res.status(400).json({ success: false, error: 'No OTP Found' })
     }
-    if (Date.now() > record.expires) {
+    if (Date.now() > record.Expire) {
         return res.status(400).json({ success: false, error: 'OTP Expired' })
     }
-    if (String(record.otp) !== String(otp).trim()) {
+    if (String(record.OTP) !== String(otp).trim()) {
         return res.status(400).json({ success: false, error: 'Invalid OTP' })
     }
-    delete otpStore[email];
+    await deleteOTP(email);
     return res.json({success: true, message: 'OTP Verified.'})
 })
 
 app.post('/Additional-Information', async (req, res) => {
-    const { contactNumber, city, state, country, zipCode } = req.body;
-    if (!contactNumber || !city || !state || !country || !zipCode) {
+    const { email, contactNumber, city, state, country, zipCode } = req.body;
+    if (!email || !contactNumber || !city || !state || !country || !zipCode) {
         return res.status(400).json({ success: false, error: 'All fields are required' })
     }
     try{
-    await fullUserInformation(contactNumber, city, state, country, zipCode)
+    const pending = await getOTP(email);
+    if (!pending) {
+        return res.status(400).json({ success: false, error: 'No pending registration found for this email.'})
+    }
+
+    const fullInformation = {
+        Email: email,
+        FirstName: pending.FirstName,
+        LastName: pending.LastName,
+        Password: pending.Password,
+        Role: pending.Role,
+        ContactNumber: contactNumber,
+        City: city,
+        State: state,
+        Country: country,
+        ZipCode: zipCode
+    }
+    await fullUserInformation(fullInformation);
+
+    await deleteOTP(email);
+
     return res.json({success: true,})
     } catch (error) {
         return res.status(500).json({success: false, error: 'Failed to Save additional data'})
