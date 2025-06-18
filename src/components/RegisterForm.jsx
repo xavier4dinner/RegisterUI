@@ -24,8 +24,7 @@ const validation = {
   },
   password: {
     required: true,
-    minLength: 8,
-    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+    minLength: 1, // or 8 if you want, but REMOVE the pattern!
   },
   retypePassword: {
     required: true,
@@ -46,6 +45,19 @@ function checkPasswordStrength(password) {
   };
 }
 
+// Add this in RegisterForm.jsx, near checkPasswordStrength
+function getPasswordStrengthLevel(password) {
+  let score = 0;
+  if (/[A-Z]/.test(password)) score += 1;        // Has capital
+  if (/\d/.test(password)) score += 1;           // Has number
+  if (password.length >= 8) score += 1;          // Has 8 characters
+
+  if (score === 3) return "strong";
+  if (score === 2) return "moderate";
+  if (score === 1) return "poor";
+  return "poor";
+}
+
 export default function RegisterForm() {
   // Registration fields and state
   const [fields, setFields] = useState({
@@ -59,6 +71,7 @@ export default function RegisterForm() {
   });
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState({});
+  const [passwordStrengthLevel, setPasswordStrengthLevel] = useState("poor");
   const [loading, setLoading] = useState(false);
 
   // OTP modal state
@@ -95,9 +108,6 @@ export default function RegisterForm() {
       if (field === "firstName" || field === "lastName")
         error = "Only letters and spaces allowed";
       if (field === "email") error = "Invalid email address";
-      if (field === "password")
-        error =
-          "Password must contain at least one uppercase letter, one lowercase letter, and one number";
     }
     return error;
   };
@@ -108,6 +118,7 @@ export default function RegisterForm() {
 
     if (name === "password") {
       setPasswordStrength(checkPasswordStrength(value));
+      setPasswordStrengthLevel(getPasswordStrengthLevel(value));
     }
 
     setErrors((prev) => ({
@@ -326,6 +337,8 @@ export default function RegisterForm() {
               <div className="checking-message">Checking username availability...</div>
             ) : usernameUsed ? (
               <div className="error-message">Username is already used.</div>
+            ) : fields.username.length >= 8 && !errors.username ? (
+              <div className="success-message">Username is available!</div>
             ) : errors.username ? (
               <div className="error-message">{errors.username}</div>
             ) : null}
@@ -380,6 +393,14 @@ export default function RegisterForm() {
               placeholder="Password"
               success={allPasswordRequirementsMet}
             />
+            {fields.password && (
+              <div className={`password-strength-indicator ${passwordStrengthLevel}`}>
+                Password strength:{" "}
+                {passwordStrengthLevel === "strong" && <span>Strong</span>}
+                {passwordStrengthLevel === "moderate" && <span>Moderate</span>}
+                {passwordStrengthLevel === "poor" && <span>Poor</span>}
+              </div>
+            )}
           </div>
 
           <div className="form-group">

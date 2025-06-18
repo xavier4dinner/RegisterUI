@@ -26,11 +26,17 @@ export default function OTPModal({ show, onSubmit, onClose, loading, error }) {
             className="input"
           />
           {error && <div className="error-message">{error}</div>}
-          <div style={{ marginTop: "1rem" }}>
-            <button type="submit" className="signup-button" disabled={loading}>
-              {loading ? "Verifying..." : "Verify"}
+          <div className="otp-button-row">
+            <button className="otp-verify-btn" type="submit">
+              Verify
             </button>
-            <button type="button" className="back-button" onClick={onClose} style={{marginLeft: "1rem"}} disabled={loading}>
+            <button
+              className="otp-cancel-btn"
+              type="button"
+              onClick={onClose}
+              style={{ marginLeft: "1rem" }}
+              disabled={loading}
+            >
               Cancel
             </button>
           </div>
