@@ -8,6 +8,8 @@ import OTPModal from './components/common/OTPModal';
 import LoginPage from './pages/Login/LoginPage';
 import Layout from './components/common/Layout';
 import LoginForm from './pages/Login/LoginForm';
+import ForgotPassword from './pages/Login/ForgotPassword';
+import ResetPassword from './pages/Login/ResetPassword';
 import "./styles/Register.css";
 import "./styles/LoginForm.css";
 
@@ -18,6 +20,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Route>
       </Routes>

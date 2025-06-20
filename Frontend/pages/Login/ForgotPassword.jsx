@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const ForgotPassword = ({ onBackToLogin }) => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,21 +29,28 @@ const ForgotPassword = ({ onBackToLogin }) => {
   };
 
   return (
-    <div>
-      <h2>Forgot Password</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        <button type="submit">Send Reset Link</button>
-      </form>
-      {message && <p style={{color: 'green'}}>{message}</p>}
-      {error && <p style={{color: 'red'}}>{error}</p>}
-      <button onClick={onBackToLogin}>Back to Login</button>
+    <div className="main">
+      <div className="form-container">
+        <h2 className="title">Forgot Password</h2>
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="label" htmlFor="forgot-email">Email</label>
+            <input
+              id="forgot-email"
+              type="email"
+              className="input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button className="signup-button" type="submit">Send Reset Link</button>
+        </form>
+        {message && <div className="success-message">{message}</div>}
+        {error && <div className="error-message">{error}</div>}
+        <button className="back-button" onClick={() => navigate('/login')} style={{marginTop: 8}}>Back to Login</button>
+      </div>
     </div>
   );
 };
