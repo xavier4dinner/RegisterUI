@@ -36,7 +36,7 @@ export default function LoginPage() {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("http://localhost:3000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,7 +50,7 @@ export default function LoginPage() {
         // Redirect to dashboard or home page after successful login
         setTimeout(() => navigate("/dashboard"), 1000);
       } else {
-        setMessage({ text: result.message || "Login failed.", type: "error" });
+        setMessage({ text: result.error || "Login failed.", type: "error" });
       }
     } catch (err) {
       setMessage({ text: "Network error. Please try again.", type: "error" });

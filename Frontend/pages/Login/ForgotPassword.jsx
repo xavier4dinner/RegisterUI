@@ -11,7 +11,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
     setError('');
     try {
       // TODO: Replace with your backend endpoint
-      const response = await fetch('/api/forgot-password', {
+      const response = await fetch('http://localhost:3000/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

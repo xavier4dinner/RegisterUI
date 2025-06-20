@@ -75,16 +75,16 @@ export async function usernameChecker(username) {
 //Register End
 
 //Login Start
-/*
 export async function LoginAccount(username) {
   const db = getDatabase(app, dbUrl);
-  const roles = ['ContentCreator', 'MarketingLead', 'GraphicDesigner'];
+  const roles = ['Admin', 'ContentCreator', 'MarketingLead', 'GraphicDesigner'];
   for (const role of roles) {
     const nodeRef = ref(db, role);
     const snapshot = await get(nodeRef);
     if (snapshot.exists()){
       const users = snapshot.val();
       for (const user of Object.values(users)) {
+        console.log("Checking user:", user.Username);
         if(user.Username && user.Username.toLowerCase() === username.toLowerCase()) {
           return user;
         }
@@ -93,4 +93,4 @@ export async function LoginAccount(username) {
     }
   }
   return null;
-}*/
+}

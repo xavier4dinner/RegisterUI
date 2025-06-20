@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
-import { OTPsave, getOTP, deleteOTP, fullUserInformation, usernameChecker} from './Firebase.mjs';
+import { OTPsave, getOTP, deleteOTP, fullUserInformation, usernameChecker, LoginAccount} from './Firebase.mjs';
 
 const app = express();
 const PORT = 3000;
@@ -116,19 +116,20 @@ app.post('/Additional-Information', async (req, res) => {
 //Register End
 
 //Login Start
-/*
 app.post('/login', async (req, res) => {
     const {username, password} = req.body;
-    if (!username || ! password) {
-        return res.status(400),json({success: false, error: 'All fields are required'})
+    console.log(username, password);
+    if (!username || !password) {
+        return res.status(400).json({success: false, error: 'All fields are required'});
     }
     const user = await LoginAccount(username);
+    console.log("User found:", user);
     if(!user) {
-        return res.status(400).json({success: false, error: 'Invalid Username and Password'})
+        return res.status(400).json({success: false, error: 'Invalid Username and Password'});
     }
-    const match = bcrypt.compare(password, user.Password)
+    const match = await bcrypt.compare(password, user.Password)
     if(!match) {
-        return res.status(400).json({success: false, error: 'Invalid Username and Password'})
+        return res.status(400).json({success: false, error: 'Invalid Username and Password'});
     }
     return res.json({
         success: true,
@@ -136,7 +137,7 @@ app.post('/login', async (req, res) => {
             Role: user.Role
         }
     })
-})*/
+})
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
