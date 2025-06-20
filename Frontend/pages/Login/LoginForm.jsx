@@ -87,6 +87,16 @@ export default function LoginForm() {
             />
             {errors.password && <div className="login-message login-message-error">{errors.password}</div>}
           </div>
+          <div style={{ textAlign: 'right', marginBottom: '1em' }}>
+            <button
+              type="button"
+              className="login-link"
+              style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', padding: 0 }}
+              onClick={() => navigate('/forgot-password')}
+            >
+              Forgot Password?
+            </button>
+          </div>
           <div className="login-actions">
             <button
               type="submit"
