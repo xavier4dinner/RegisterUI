@@ -43,7 +43,13 @@ export default function LoginForm() {
       const result = await response.json();
       if (response.ok) {
         setMessage({ text: "Login successful!", type: "success" });
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => {
+          if (result.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        }, 1000);
       } else {
         setMessage({ text: result.message || "Login failed.", type: "error" });
       }

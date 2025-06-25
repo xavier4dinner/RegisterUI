@@ -8,27 +8,31 @@ const AdminDashboard = () => {
       <div className="dashboard-container">
         <div className="sidebar">
           {/* Logo */}
-          <div className="logo">
-            <img src="/assets/issalonlogo.jpg" alt="infinitysalon" />
+          <div className="logo" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img src="/assets/issalonlogo.jpg" alt="infinitysalon" style={{ display: 'block', margin: '0 auto', maxWidth: '100%', height: 'auto' }} />
           </div>
           {/* User Profile */}
-          <div className="user-profile">
-            <button className="header-profile-btn" aria-label="Profile">
-              <span className="header-profile-avatar">
-                <FiUser size={24} />
-              </span>
-            </button>
-            <div className="user-info">
-              <div className="user-name">Name</div>
-              <div className="user-role">Role</div>
+          <div className="user-profile-divider-wrapper" style={{ position: 'relative', marginBottom: 24 }}>
+            <div className="user-profile">
+              <button className="header-profile-btn" aria-label="Profile">
+                <span className="header-profile-avatar">
+                  <FiUser size={24} />
+                </span>
+              </button>
+              <div className="user-info">
+                <div className="user-name">Name</div>
+                <div className="user-role">Role</div>
+              </div>
             </div>
+            <hr style={{ position: 'absolute', left: '-24px', right: '-24px', border: 'none', borderTop: '1px solid #e0e0e0', margin: 0, width: 'calc(100% + 48px)' }} />
           </div>
+          <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '0 0 24px 0', width: '100%' }} />
           {/* Navigation */}
           <nav className="navigation">
             <div className="nav-item active">Dashboard</div>
-            <div className="nav-item">Manage Account</div>
-            <div className="nav-item">Posted Content</div>
-            <div className="nav-item">Approval of Task</div>
+            <div className="nav-item">Approval of Accounts</div>
+            <div className="nav-item">Manage Accounts</div>
+            <div className="nav-item">Socials & Insights</div>
           </nav>
         </div>
         <div className="main-content">
