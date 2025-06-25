@@ -58,5 +58,11 @@ export const config = {
     // Current environment (development, production, test, etc.)
     // Uses NODE_ENV environment variable if set, otherwise defaults to 'development'
     nodeEnv: process.env.NODE_ENV || 'development'
-  }
+  },
+
+  // JWT Configuration
+  jwt: {
+    secret: process.env.JWT_SECRET || '274c13415a172d06c45ee0f813853ead60b7b37e030ad98079f30bbc0a4cf78a',
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d'
+  },
 };

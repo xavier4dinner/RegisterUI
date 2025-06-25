@@ -159,7 +159,7 @@ class FirebaseService {
           const users = snapshot.val();
           // Find user with matching username (case-insensitive)
           const user = Object.values(users).find(
-            u => u.Username && u.Username.toLowerCase() === username.toLowerCase()
+            u => u.username && u.username.toLowerCase() === username.toLowerCase()
           );
           
           // If user found, return with role included

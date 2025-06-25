@@ -64,11 +64,12 @@ export default function RegisterForm() {
     firstName: "",
     lastName: "",
     email: "",
-    username: "", // <-- add this
+    username: "",
     role: "",
     password: "",
-    retypePassword: ""
+    retypePassword: ""  
   });
+  
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState({});
   const [passwordStrengthLevel, setPasswordStrengthLevel] = useState("poor");
@@ -271,13 +272,13 @@ export default function RegisterForm() {
   const showPasswordSuccess = allPasswordRequirementsMet && passwordsMatch;
 
   const firstNameValid =
-    fields.firstName.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.firstName);
+  fields?.firstName?.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.firstName);
 
-  const lastNameValid =
-    fields.lastName.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.lastName);
+const lastNameValid =
+  fields?.lastName?.length >= 2 && /^[a-zA-Z\s]+$/.test(fields.lastName);
 
-  const emailValid =
-    /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(fields.email);
+const emailValid =
+  fields?.email && /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(fields.email);
 
   return (
     <div className="form-container">
@@ -374,9 +375,9 @@ export default function RegisterForm() {
               required
             >
               <option value="">Select your role</option>
-              <option value="Marketing Lead">Marketing Lead</option>
-              <option value="Content Creator">Content Creator</option>
-              <option value="Graphic Designer">Graphic Designer</option>
+              <option value="MarketingLead">Marketing Lead</option>
+              <option value="ContentCreator">Content Creator</option>
+              <option value="GraphicDesigner">Graphic Designer</option>
             </select>
             <div className="error-message">{errors.role}</div>
           </div>

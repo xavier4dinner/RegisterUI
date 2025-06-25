@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 import { config } from '../config/config.mjs';
 import EmailService from '../services/email.service.mjs';
 import FirebaseService from '../services/firebase.service.mjs';
-import AppError from '../utils/errorHandler.mjs';
+import {AppError} from '../utils/errorHandler.mjs';
 
 // ========================
 // 2) CONTROLLER FUNCTIONS
@@ -27,12 +27,25 @@ import AppError from '../utils/errorHandler.mjs';
  * @returns {Object} JSON response with validation results
  */
 const validateOTPRegistration = (req, res, next) => {
+
+  console.log('Sending Registration data', {
+    ...req.body,
+    role: req.body.role
+  })
+
   // Extract data from request body
-  const { email, firstName, lastName, username, password, retypePassword, role } = req.body;
+  const { email, firstName,lastName, username, password, retypePassword, role } = req.body;
   
   // Check if all required fields are provided
   if (!email || !firstName || !lastName || !username || !password || !retypePassword || !role) {
     return next(new AppError('All fields are required', 400));
+  }
+
+  console.log('Recieved role:', role);
+  const validRoles = ['ContentCreator', 'MarketingLead', 'GraphicDesigner'];
+  if (!validRoles.includes(role)) {
+    console.log('Valid reoles are:', validRoles);
+    return next(new AppError('Invalid role specified', 400));
   }
 
   // Validate email format using regex
@@ -240,14 +253,30 @@ const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
+    console.log('Login attempt for username:', username);
+
+    if(!username || !password) {
+      return next(new AppError('Please provide username and password!', 400))
+    }
+
     // Find user by username
     const user = await FirebaseService.findUserByUsername(username);
+    console.log('User found in database:', user ? 'yes' : 'no');
+
     if (!user) {
       return next(new AppError('Incorrect username or password', 401));
     }
 
+    console.log('User data from DB:', {
+      username: user.username,
+      hasPassword: !!user.password,
+      role: user.role
+    });
+
     // Verify password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    console.log('Password check result:', isPasswordCorrect);
+
     if (!isPasswordCorrect) {
       return next(new AppError('Incorrect username or password', 401));
     }
