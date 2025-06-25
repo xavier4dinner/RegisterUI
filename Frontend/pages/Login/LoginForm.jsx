@@ -44,11 +44,7 @@ export default function LoginForm() {
       if (response.ok) {
         setMessage({ text: "Login successful!", type: "success" });
         setTimeout(() => {
-          if (result.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
-          }
+          navigate('/dashboard');
         }, 1000);
       } else {
         setMessage({ text: result.message || "Login failed.", type: "error" });

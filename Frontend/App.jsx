@@ -23,9 +23,9 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Route>
-        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
