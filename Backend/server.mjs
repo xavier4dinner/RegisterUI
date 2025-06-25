@@ -1,144 +1,161 @@
-import nodemailer from 'nodemailer';
-import express from 'express';
-import cors from 'cors';
-import bcrypt from 'bcrypt';
-import { OTPsave, getOTP, deleteOTP, fullUserInformation, usernameChecker, LoginAccount} from './Firebase.mjs';
+// ========================
+// 1) IMPORTS & CONFIGURATION
+// ========================
+// Core Node.js modules for file and directory paths
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
+// Third-party middleware for Express.js
+import express from 'express';         // Web framework for Node.js
+import cors from 'cors';               // Middleware for enabling CORS
+import morgan from 'morgan';           // HTTP request logger
+import rateLimit from 'express-rate-limit'; // Rate limiting middleware
+import helmet from 'helmet';           // Security headers middleware
+import mongoSanitize from 'express-mongo-sanitize'; // Sanitizes user-supplied data
+import xss from 'xss-clean';           // Sanitize user input coming from POST body, GET queries, and url params
+import hpp from 'hpp';                 // Protects against HTTP Parameter Pollution attacks
+
+// Application routes
+import authRouter from './routes/auth.routes.mjs';
+
+// Configuration
+import { config } from './config/config.mjs';
+
+// Error handling utilities
+import errorHandler from './utils/errorHandler.mjs';
+
+// Initialize __dirname for ES modules (since it's not available by default in ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Create Express application
 const app = express();
-const PORT = 3000;
 
-app.use(cors());
-app.use(express.json());
+// ========================
+// 2) GLOBAL MIDDLEWARES
+// ========================
 
+// Enable CORS (Cross-Origin Resource Sharing)
+// This allows requests from the frontend running on port 5173
+app.use(cors({
+  origin: 'http://localhost:5173',  // Frontend URL
+  credentials: true  // Allow cookies to be sent with requests
+}));
 
-//Register Start
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'tobia166@gmail.com',
-        pass: 'mtyh gfrd noaf aejh'
-    }
-});
+// Set security HTTP headers using helmet
+// This adds various security headers to protect against common web vulnerabilities
+app.use(helmet());
 
-function generateOTP() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+// Development logging
+// Only log HTTP requests in development environment
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));  // Logs request details to console
 }
 
-// OTP Save
-app.post('/OTP-save', async (req, res) => {
-    try {
-        const { email, firstName, lastName, username, password, role, retypePassword} = req.body;
-        if (!email || !firstName || !lastName || !username ||  !password || !retypePassword) {
-            return res.status(400).json({ success: false, error: 'All fields are required' });
-        }
+// Rate limiting
+// Limits the number of requests from a single IP to prevent abuse
+const limiter = rateLimit({
+  max: 100,  // Maximum 100 requests per hour
+  windowMs: 60 * 60 * 1000,  // Time window: 1 hour
+  message: 'Too many requests from this IP, please try again in an hour!'
+});
+app.use('/api', limiter);  // Apply rate limiting to all API routes
 
-        if(await usernameChecker(username)) {
-            return res.status(400).json({success: false, error: 'Username already exists'})
-        }
+// Body parser middleware
+// Parses incoming request bodies in JSON format (up to 10kb)
+app.use(express.json({ limit: '10kb' }));
+// Parses URL-encoded bodies (for form submissions)
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+// Data sanitization against NoSQL query injection
+// Removes any keys containing prohibited characters ($ and .)
+app.use(mongoSanitize());
 
-        const otp = generateOTP();
-        const expire =  Date.now() + 3 * 60 * 1000;
+// Data sanitization against XSS (Cross-Site Scripting)
+// Cleans user input from malicious HTML code
+app.use(xss());
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+// Prevent parameter pollution
+// Cleans up duplicate query parameters
+app.use(
+  hpp({
+    whitelist: [  // Fields that can be duplicated in query parameters
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ]
+  })
+);
 
-        await OTPsave(email, firstName, lastName, username, hashedPassword, role, otp, expire);
+// Serve static files from the 'public' directory
+// Files in this directory can be accessed directly via URL
+app.use(express.static(path.join(__dirname, 'public')));
 
-        try {
-            await transporter.sendMail({
-                from: '"Infinity" <tobia166@gmail.com>',
-                to: email,
-                subject: 'OTP Code',
-                text: `Your OTP Code ${otp}`
-            });
-        } catch (error) {
-            console.log('Error sending email:', error);
-            return res.status(500).json({ success: false, error: 'Failed to send Email' });
-        }
-
-        return res.json({ success: true });
-    } catch (error) {
-        console.log('User not registered:', error);
-        return res.status(500).json({ success: false, error: error.message });
-    }
+// Custom middleware to add request timestamp
+// This adds a 'requestTime' property to the request object
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
 });
 
-//OTP verification
-app.post('/verify-otp', async (req, res) => {
-    const { email, otp } = req.body;
-    const record = await getOTP(email);
-    if (!record) {
-        return res.status(400).json({ success: false, error: 'No OTP Found' })
-    }
-    if (Date.now() > record.Expire) {
-        return res.status(400).json({ success: false, error: 'OTP Expired' })
-    }
-    if (String(record.OTP) !== String(otp).trim()) {
-        return res.status(400).json({ success: false, error: 'Invalid OTP' })
-    }
-    return res.json({success: true, message: 'OTP Verified.'})
-})
+// ========================
+// 3) ROUTES
+// ========================
+// Mount the authentication routes under /api/v1/auth
+app.use('/api/v1/auth', authRouter);
 
-app.post('/Additional-Information', async (req, res) => {
-    const { email, contactNumber, city, state, country, zipCode } = req.body;
-    console.log(req.body)
-    if (!email || !contactNumber || !city || !state || !country || !zipCode) {
-        return res.status(400).json({ success: false, error: 'All fields are required' })
-    }
-    try{
-    const pending = await getOTP(email);
-    if (!pending) {
-        return res.status(400).json({ success: false, error: 'No pending registration found for this email.'})
-    }
+// ========================
+// 4) ERROR HANDLING
+// ========================
 
-    const fullInformation = {
-        Email: pending.Email,
-        FirstName: pending.FirstName,
-        LastName: pending.LastName,
-        Username: pending.Username,
-        Password: pending.Password,
-        Role: pending.Role,
-        ContactNumber: contactNumber,
-        City: city,
-        State: state,
-        Country: country,
-        ZipCode: zipCode
-    }
-    await fullUserInformation(fullInformation);
+// Handle 404 Not Found errors
+// This middleware catches all routes that don't match any defined routes
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on this server!`
+  });
+});
 
-    await deleteOTP(email);
+// Global error handling middleware
+// This will catch any errors that occur in route handlers
+app.use(errorHandler);
 
-    return res.json({success: true,})
-    } catch (error) {
-        return res.status(500).json({success: false, error: 'Failed to Save additional data'})
-    }
-})
-//Register End
+// ========================
+// 5) START SERVER
+// ========================
+// Get the port from environment variables or use 3000 as default
+const port = config.server.port || 3000;
 
-//Login Start
-app.post('/login', async (req, res) => {
-    const {username, password} = req.body;
-    console.log(username, password);
-    if (!username || !password) {
-        return res.status(400).json({success: false, error: 'All fields are required'});
-    }
-    const user = await LoginAccount(username);
-    console.log("User found:", user);
-    if(!user) {
-        return res.status(400).json({success: false, error: 'Invalid Username and Password'});
-    }
-    const match = await bcrypt.compare(password, user.Password)
-    if(!match) {
-        return res.status(400).json({success: false, error: 'Invalid Username and Password'});
-    }
-    return res.json({
-        success: true,
-        user: {
-            Role: user.Role
-        }
-    })
-})
+// Start the Express server
+const server = app.listen(port, () => {
+  console.log(`App running on port ${port}...`);
+});
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// ========================
+// 6) UNHANDLED REJECTIONS & GRACEFUL SHUTDOWN
+// ========================
+
+// Handle unhandled promise rejections
+// This catches any unhandled promise rejections that might occur
+process.on('unhandledRejection', err => {
+  console.log('UNHANDLED REJECTION! Shutting down...');
+  console.log(err.name, err.message);
+  // Close the server gracefully before exiting
+  server.close(() => {
+    process.exit(1);  // Exit with failure
+  });
+});
+
+// Handle SIGTERM signal for graceful shutdown
+// This allows the server to complete any pending requests before shutting down
+process.on('SIGTERM', () => {
+  console.log('SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated!');
+  });
 });
