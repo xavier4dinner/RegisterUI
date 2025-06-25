@@ -210,7 +210,7 @@ export default function RegisterForm() {
       };
 
       // Send to backend
-      const response = await fetch("http://localhost:3000/OTP-save", {
+      const response = await fetch("http://localhost:3000/api/v1/auth/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -236,7 +236,7 @@ export default function RegisterForm() {
     setOtpError("");
     try {
       // Send OTP and user info to backend
-      const response = await fetch("http://localhost:3000/verify-otp", {
+      const response = await fetch("http://localhost:3000/api/v1/auth/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
