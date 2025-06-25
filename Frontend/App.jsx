@@ -12,6 +12,7 @@ import ForgotPassword from './pages/Login/ForgotPassword';
 import ResetPassword from './pages/Login/ResetPassword';
 import "./styles/Register.css";
 import "./styles/LoginForm.css";
+import AdminDashboard from './pages/Admin/AdminDashboard';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Route>
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
