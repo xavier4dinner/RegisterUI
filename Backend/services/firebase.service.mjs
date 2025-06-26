@@ -60,16 +60,34 @@ class FirebaseService {
    * @returns {Promise<boolean>} True if operation is successful
    * @throws {Error} If saving fails
    */
-  static async saveOTP(email, userData) {
+  static async savePendingApproval(userData) {
     try {
-      // Create a reference to the OTPVerification node with email as key
-      const otpRef = ref(db, `OTPVerification/${safeKey(email)}`);
-      // Save the data to the database
-      await set(otpRef, userData);
-      return true;
+      const userRef = push(ref(db, 'pendingApprovals'));
+      await set(userRef, {
+        ...userData,
+        id: userRef.key
+      });
+      return userRef.key;
     } catch (error) {
-      console.error('Error saving OTP:', error);
-      throw new Error('Failed to save OTP');
+      console.error('Error saving pending approval:', error);
+      throw error;
+    }
+  }
+
+  static async createAdminNotification(userData) {
+    try {
+      const adminId = 'admin123'; // Hardcoded admin ID
+      const notificationRef = push(ref(db, `adminNotifications/${adminId}`));
+      await set(notificationRef, {
+        type: 'new_approval',
+        userId: userData.id,
+        message: `New ${userData.role} account needs approval: ${userData.firstName} ${userData.lastName} (${userData.email})`,
+        read: false,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Error creating admin notification:', error);
+      throw error;
     }
   }
 
