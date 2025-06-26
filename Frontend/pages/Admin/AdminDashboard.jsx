@@ -35,19 +35,17 @@ const AdminDashboard = () => {
             <div className="nav-item">Socials & Insights</div>
           </nav>
         </div>
-        <div className="main-content">
+        <div className="main-content" style={{ flex: 1 }}>
           {/* Header */}
-          <div className="header">
-            <div className="header-actions" style={{display: 'flex', alignItems: 'center', gap: 16}}>
-              <button className="notification-bell" aria-label="Notifications" style={{background: 'none', border: 'none', cursor: 'pointer', padding: 0}}>
-                <FiBell size={24} />
-              </button>
-              <button className="header-profile-btn" aria-label="Profile">
-                <span className="header-profile-avatar">
-                  <FiUser size={24} />
-                </span>
-              </button>
-            </div>
+          <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: 64, background: '#fafafa', borderBottom: '1px solid #e0e0e0', padding: '0 24px' }}>
+            <button className="notification-bell" aria-label="Notifications" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: 16 }}>
+              <FiBell size={24} />
+            </button>
+            <button className="header-profile-btn" aria-label="Profile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <span className="header-profile-avatar">
+                <FiUser size={24} />
+              </span>
+            </button>
           </div>
         </div>
       </div>
