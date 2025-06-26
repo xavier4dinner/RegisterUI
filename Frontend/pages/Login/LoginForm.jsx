@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from '../../components/common/UserContext';
 import "../../styles/LoginForm.css";
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const [fields, setFields] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,7 @@ export default function LoginForm() {
       const result = await response.json();
       if (response.ok) {
         setMessage({ text: "Login successful!", type: "success" });
+        setUser({ name: result.name, role: result.role });
         setTimeout(() => {
           navigate('/dashboard');
         }, 1000);
