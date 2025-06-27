@@ -2,15 +2,17 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiBell, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import { useUser } from './UserContext';
 import "../../styles/Admin.css";
+import { Link, useLocation } from 'react-router-dom';
 
 const DashboardLayout = ({ children }) => {
   const { user } = useUser();
-  const adminName = user?.name || "Jane Doe";
-  const adminRole = user?.role || "Administrator";
+  const adminName = user?.name || "Admin";
+  const adminRole = user?.role || "role";
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const notifRef = useRef(null);
   const profileRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -51,10 +53,10 @@ const DashboardLayout = ({ children }) => {
           <hr style={{ border: 'none', borderTop: '1px solid #e0e0e0', margin: '0 0 24px 0', width: '100%' }} />
           {/* Navigation - can be customized per role in the future */}
           <nav className="navigation">
-            <div className="nav-item active">Dashboard</div>
-            <div className="nav-item">Approval of Accounts</div>
-            <div className="nav-item">Manage Accounts</div>
-            <div className="nav-item">Socials & Insights</div>
+            <Link to="/admin" className={`nav-item${location.pathname === '/admin' ? ' active' : ''}`}>Dashboard</Link>
+            <Link to="/admin/approval" className={`nav-item${location.pathname === '/admin/approval' ? ' active' : ''}`}>Approval of Accounts</Link>
+            <Link to="/admin/manage" className={`nav-item${location.pathname === '/admin/manage' ? ' active' : ''}`}>Manage Accounts</Link>
+            <Link to="/admin/socials" className={`nav-item${location.pathname === '/admin/socials' ? ' active' : ''}`}>Socials & Insights</Link>
           </nav>
         </div>
         <div className="main-content" style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
