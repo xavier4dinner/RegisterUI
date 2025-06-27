@@ -13,6 +13,10 @@ import ResetPassword from './pages/Login/ResetPassword';
 import "./styles/Register.css";
 import "./styles/LoginForm.css";
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import ApprovalOfAccountsPage from './pages/Admin/ApprovalOfAccountsPage';
+import AdminRoute from './components/common/AdminRoute';
+import ManageAccountsPage from './pages/Admin/ManageAccountsPage';
+import DashboardLayout from './components/common/DashboardLayout';
 //add endpoint cuz they 4 dashboard
 function App() {
   return (
@@ -25,7 +29,19 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Route>
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<DashboardLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="approval" element={
+            <AdminRoute>
+              <ApprovalOfAccountsPage />
+            </AdminRoute>
+          } />
+          <Route path="manage" element={
+            <AdminRoute>
+              <ManageAccountsPage />
+            </AdminRoute>
+          } />
+        </Route>
       </Routes>
     </Router>
   );
