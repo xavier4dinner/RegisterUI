@@ -206,13 +206,14 @@ const completeRegistration = async (req, res, next) => {
     };
 
     // Save user to the appropriate role collection
-    const userId = await FirebaseService.savePendingApproval(userData);
+    const userId = await FirebaseService.saveUser(userData);
 
     // Create admin notification
+    /*
     await FirebaseService.createAdminNotification({
       ...userData,
       id: userId
-    });
+    });*/
     
     // Clean up OTP data after successful registration
     await FirebaseService.deleteOTP(email);
