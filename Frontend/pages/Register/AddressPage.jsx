@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AddressForm from './AddressForm';
 
 const validation = {
@@ -20,6 +21,7 @@ function validateField(field, value) {
 }
 
 export default function AddressPage({ email }) {
+  const navigate = useNavigate();
   const [fields, setFields] = useState({
     contactNumber: "",
     city: "",
@@ -60,6 +62,9 @@ export default function AddressPage({ email }) {
       });
       if (!response.ok) throw new Error("Failed to submit information");
       setSubmitted(true);
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
     } catch (err) {
       setSubmitError("Failed to submit information. Please try again.");
     } finally {
@@ -67,11 +72,11 @@ export default function AddressPage({ email }) {
     }
   };
 
+  
   if (submitted) {
     return (
       <div className="form-success">
-        <h2>Information Submitted!</h2>
-        <pre>{JSON.stringify(fields, null, 2)}</pre>
+        <h2>Register Completed!</h2>
       </div>
     );
   }
