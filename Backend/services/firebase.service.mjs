@@ -124,8 +124,8 @@ class FirebaseService {
    */
   static async saveUser(userData) {
     try {
-      // Create a new reference in the pendingApproval node with auto-generated ID
-      const userRef = push(ref(db, 'pendingApproval'));
+      // Create a new reference in the ApprovalofAccounts node with auto-generated ID
+      const userRef = push(ref(db, 'ApprovalofAccounts'));
       // Save the user data to the new reference
       await set(userRef, userData);
       // Return the generated user ID

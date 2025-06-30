@@ -1,71 +1,86 @@
 import React, { useEffect, useState } from 'react';
+import { db } from '../../services/firebase';
+import { ref, onValue, off, remove, set, get } from 'firebase/database';
 import AccountCard from '../../components/common/AccountCard';
 
 const ApprovalOfAccountsPage = () => {
-  const [accountsByRole, setAccountsByRole] = useState({});
+  const [pendingAccounts, setPendingAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // BACKEND: Fetch all pending accounts from the backend API
-    // Endpoint should return an array of accounts with at least: id, name, email, role
-    fetch('/api/accounts/pending') // <-- Update with your real endpoint
-      .then(res => res.json())
-      .then(data => {
-        // Group accounts by role
-        const grouped = {};
-        data.forEach(acc => {
-          if (!grouped[acc.role]) grouped[acc.role] = [];
-          grouped[acc.role].push(acc);
-        });
-        setAccountsByRole(grouped);
+    const approvalAccountsRef = ref(db, 'ApprovalofAccounts');
+
+    get(approvalAccountsRef).then((snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const accounts = Object.entries(data).map(([key, value]) => ({
+          key,
+          ...value,
+        }));
+        setPendingAccounts(accounts);
+      } else {
+        setPendingAccounts([]);
+      }
+      setLoading(false);
+    }).catch(error => {
+        console.error("Error fetching initial data:", error);
         setLoading(false);
-      });
+    });
+
+    const listener = onValue(approvalAccountsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const accounts = Object.entries(data).map(([key, value]) => ({
+          key,
+          ...value,
+        }));
+        setPendingAccounts(accounts);
+      } else {
+        setPendingAccounts([]);
+      }
+    });
+
+    return () => {
+      off(approvalAccountsRef, 'value', listener);
+    };
   }, []);
 
-  // BACKEND: Call backend API to approve or reject an account by ID
-  // Endpoint should update the account's status accordingly
-  const handleAction = (id, action) => {
-    fetch(`/api/accounts/${id}/${action}`, { method: 'POST' })
-      .then(res => {
-        if (res.ok) {
-          // Remove account from UI after successful backend update
-          setAccountsByRole(prev => {
-            const updated = { ...prev };
-            for (const role in updated) {
-              updated[role] = updated[role].filter(acc => acc.id !== id);
-            }
-            return updated;
-          });
-        }
-      });
+  const handleApprove = (account) => {
+    const roleRef = ref(db, `${account.role}/${account.key}`);
+    set(roleRef, account)
+      .then(() => {
+        const pendingRef = ref(db, `ApprovalofAccounts/${account.key}`);
+        remove(pendingRef);
+      })
+      .catch(error => console.error("Error approving account:", error));
+  };
+
+  const handleReject = (accountKey) => {
+    const pendingRef = ref(db, `ApprovalofAccounts/${accountKey}`);
+    remove(pendingRef).catch(error => console.error("Error rejecting account:", error));
   };
 
   if (loading) return <div>Loading...</div>;
 
-  const hasAccounts = Object.values(accountsByRole).some(arr => arr.length > 0);
-
   return (
     <div className="approval-page-container">
-      {!hasAccounts && (
+      {pendingAccounts.length === 0 ? (
         <div style={{textAlign: 'center', marginTop: '2rem', color: '#888', fontSize: '1.2rem'}}>
           No accounts pending approval.
         </div>
-      )}
-      {Object.entries(accountsByRole).map(([role, accounts]) => (
-        accounts.length > 0 && (
-          <div key={role} className="role-section">
-            <h2>{role}</h2>
-            {accounts.map(account => (
-              <AccountCard
-                key={account.id}
+      ) : (
+        <div className="accounts-list">
+          <h2>Pending Accounts</h2>
+          {pendingAccounts.map(account => (
+            <AccountCard
+                key={account.key}
                 account={account}
-                onAccept={() => handleAction(account.id, 'approve')}
-                onReject={() => handleAction(account.id, 'reject')}
+                onAccept={() => handleApprove(account)}
+                onReject={() => handleReject(account.key)}
               />
-            ))}
-          </div>
-        )
-      ))}
+          ))}
+        </div>
+      )}
     </div>
   );
 };

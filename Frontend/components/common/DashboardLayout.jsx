@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiBell, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import { useUser } from './UserContext';
 import "../../styles/Admin.css";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {
   const { user } = useUser();
   const adminName = user?.name || "Admin";
   const adminRole = user?.role || "role";
@@ -103,8 +103,8 @@ const DashboardLayout = ({ children }) => {
             </div>
           </div>
           {/* Children content for each role/page */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 0 }}>
-            {children}
+          <div className="content-area" style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+            <Outlet />
           </div>
         </div>
       </div>

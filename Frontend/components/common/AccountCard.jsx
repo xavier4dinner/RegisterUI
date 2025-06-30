@@ -10,7 +10,7 @@ import './AccountCard.css';
 const AccountCard = ({ account, onAccept, onReject, onDelete }) => (
   <div className="account-card">
     <div className="account-info">
-      <strong>{account.name}</strong> <br />
+      <strong>{account.firstName} {account.lastName}</strong> ({account.role})<br />
       <span>{account.email}</span>
     </div>
     <div className="account-actions">
