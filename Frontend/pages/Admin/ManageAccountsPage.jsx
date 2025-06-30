@@ -1,48 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import ManageAccountCard from '../../components/common/ManageAccountCard';
+import { db } from '../../services/firebase';
+import { ref, onValue, off, remove } from 'firebase/database';
+import AccountCard from '../../components/common/AccountCard';
+
+const ROLES = ['ContentCreator', 'MarketingLead', 'GraphicDesigner'];
 
 const ManageAccountsPage = () => {
   const [accountsByRole, setAccountsByRole] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // BACKEND: Fetch all user accounts from the backend API
-    // Endpoint should return an array of accounts with at least: id, name, email, role
-    fetch('/api/accounts/all') // <-- Update with your real endpoint
-      .then(res => res.json())
-      .then(data => {
-        // Group accounts by role
-        const grouped = {};
-        data.forEach(acc => {
-          if (!grouped[acc.role]) grouped[acc.role] = [];
-          grouped[acc.role].push(acc);
-        });
-        setAccountsByRole(grouped);
+    const listeners = [];
+    setLoading(true);
+    // Set up a listener for each role
+    ROLES.forEach(role => {
+      const roleRef = ref(db, role);
+      const listener = onValue(roleRef, (snapshot) => {
+        const data = snapshot.val();
+        setAccountsByRole(prev => ({
+          ...prev,
+          [role]: data
+            ? Object.entries(data).map(([key, value]) => ({ key, ...value, role }))
+            : []
+        }));
         setLoading(false);
       });
+      listeners.push({ ref: roleRef, listener });
+    });
+    return () => {
+      listeners.forEach(({ ref, listener }) => off(ref, 'value', listener));
+    };
   }, []);
 
-  // BACKEND: Call backend API to delete an account by ID
-  // Endpoint should remove the account from the database
-  const handleDelete = (id) => {
-    fetch(`/api/accounts/${id}/delete`, { method: 'DELETE' })
-      .then(res => {
-        if (res.ok) {
-          // Remove account from UI after successful backend deletion
-          setAccountsByRole(prev => {
-            const updated = { ...prev };
-            for (const role in updated) {
-              updated[role] = updated[role].filter(acc => acc.id !== id);
-            }
-            return updated;
-          });
-        }
-      });
+  const handleDelete = (role, key) => {
+    const userRef = ref(db, `${role}/${key}`);
+    remove(userRef).catch(error => console.error('Error deleting account:', error));
   };
 
   if (loading) return <div>Loading...</div>;
 
-  const hasAccounts = Object.values(accountsByRole).some(arr => arr.length > 0);
+  const hasAccounts = Object.values(accountsByRole).some(arr => arr && arr.length > 0);
 
   return (
     <div className="manage-accounts-page-container">
@@ -51,15 +48,15 @@ const ManageAccountsPage = () => {
           No accounts found.
         </div>
       )}
-      {Object.entries(accountsByRole).map(([role, accounts]) => (
-        accounts.length > 0 && (
+      {ROLES.map(role => (
+        accountsByRole[role] && accountsByRole[role].length > 0 && (
           <div key={role} className="role-section">
             <h2>{role}</h2>
-            {accounts.map(account => (
-              <ManageAccountCard
-                key={account.id}
+            {accountsByRole[role].map(account => (
+              <AccountCard
+                key={account.key}
                 account={account}
-                onDelete={() => handleDelete(account.id)}
+                onDelete={() => handleDelete(role, account.key)}
               />
             ))}
           </div>
