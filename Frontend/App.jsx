@@ -17,7 +17,7 @@ import ApprovalOfAccountsPage from './pages/Admin/ApprovalOfAccountsPage';
 import AdminRoute from './components/common/AdminRoute';
 import ManageAccountsPage from './pages/Admin/ManageAccountsPage';
 import DashboardLayout from './components/common/DashboardLayout';
-//add endpoint cuz they 4 dashboard
+
 function App() {
   return (
     <Router>
